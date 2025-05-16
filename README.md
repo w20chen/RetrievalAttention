@@ -116,6 +116,16 @@ If you find this project helpful, please cite our paper:
     primaryClass={cs.LG},
     url={https://arxiv.org/abs/2505.02922}, 
 }
+
+@misc{liu2024retrievalattentionacceleratinglongcontextllm,
+      title={RetrievalAttention: Accelerating Long-Context LLM Inference via Vector Retrieval}, 
+      author={Di Liu and Meng Chen and Baotong Lu and Huiqiang Jiang and Zhenhua Han and Qianxi Zhang and Qi Chen and Chengruidong Zhang and Bailu Ding and Kai Zhang and Chen Chen and Fan Yang and Yuqing Yang and Lili Qiu},
+      year={2024},
+      eprint={2409.10516},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2409.10516}, 
+}
 ```
 
 ## Contributing

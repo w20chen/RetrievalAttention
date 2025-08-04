@@ -1,6 +1,6 @@
 # RetroKV/RetroInfer
 
-[RetroInfer](https://arxiv.org/pdf/2505.02922) is a novel system that **rethinks the KV cache as vector storage** within a GPU–CPU co-execution setup to accelerate long-context LLM inference. It exploits the inherent sparsity of the attention mechanism and introduces an **A**ttention-a**W**are **VE**ctor index (*wave index*) that enables efficient and accurate retrieval of critical tokens from the KV cache. Complementing this is the *wave buffer*, which coordinates KV cache placement and overlaps computation and data transfer across GPU and CPU to sustain high throughput.
+[RetroKV/RetroInfer](https://arxiv.org/pdf/2505.02922) is a novel system that **rethinks the KV cache as vector storage** within a GPU–CPU co-execution setup to accelerate long-context LLM inference. It exploits the inherent sparsity of the attention mechanism and introduces an **A**ttention-a**W**are **VE**ctor index (*wave index*) that enables efficient and accurate retrieval of critical tokens from the KV cache. Complementing this is the *wave buffer*, which coordinates KV cache placement and overlaps computation and data transfer across GPU and CPU to sustain high throughput.
 
 ## Getting Started
 

@@ -22,7 +22,7 @@ python -m pip install pip==25.0
 
 # install python packages
 pip install -r requirements.txt
-pip install flash-attn==2.6.3 --no-build-isolation
+pip install flash-attn==2.7.3 --no-build-isolation
 pip install flashinfer-python==0.2.4 -i https://flashinfer.ai/whl/cu124/torch2.5/
 pip install git+https://github.com/Starmys/flash-attention.git@weighted
 ```

@@ -441,6 +441,7 @@ class retroinfer_cache(KV_Cache):
     # update KV cache when generate tokens exceed THRESHOLD_LENGTH
     def _update_kv_cache(self):
         for ldx in range(self.layer_num):
+            torch.cuda.set_device(self.layer_mapping[str(ldx)])
             update_keys = self.steady_zone_keys[ldx][:, :, self.static_pattern_start:self.static_pattern_total-self.static_pattern_end, :].clone().reshape(self.batch_size*self.kv_head, THRESHOLD_LENGTH, self.head_dim).contiguous()
             update_values = self.steady_zone_values[ldx][:, :, self.static_pattern_start:self.static_pattern_total-self.static_pattern_end, :].clone().reshape(self.batch_size*self.kv_head, THRESHOLD_LENGTH, self.head_dim).contiguous()
             self.mainevents[self.layer_mapping[str(ldx)]].record()
@@ -486,6 +487,7 @@ class retroinfer_cache(KV_Cache):
                 _clusters.cpu().contiguous(),       # (batch_size*group_num, n_centroids_per_update_segment, max_cluster_size)
                 _cluster_size.cpu().contiguous()    # (batch_size*group_num, n_centroids_per_update_segment)
             )
+        torch.cuda.set_device(self.layer_mapping[str(0)])
         
         # update n_centroids
         self.n_centroids += self.n_centroids_per_update_segment

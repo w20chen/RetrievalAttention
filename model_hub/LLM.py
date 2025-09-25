@@ -189,7 +189,8 @@ class LLM:
         decode_end = time.time()
         print(colored(
             f"Decoding latency: {round((decode_end - decode_start) * 1000 / (self.max_new_length - 1), 2)} ms/step, "
-            f"Throughput: {round(self.batch_size * (self.max_new_length - 1) / (decode_end - decode_start), 2)} tokens/s\n",
+            f"Throughput: {round(self.batch_size * (self.max_new_length - 1) / (decode_end - decode_start), 2)} tokens/s, "
+            f"Decoding total time: {round((decode_end - decode_start), 4)} s\n",
             'green'
         ))
         

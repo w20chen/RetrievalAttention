@@ -161,10 +161,24 @@ class LLM:
         return logits
 
 
-    def inference(self, inputs_ids):
+    def inference(self, inputs_ids, stop_words=None):
+        
         outputs_ids = []    # multi iteration, multi request
         output_ids = []     # single iteration, multi request
-        
+
+        processed_stop_words = None
+        if stop_words is not None:
+            processed_stop_words = []
+            for stop_seq in stop_words:
+                if isinstance(stop_seq, str):
+                    if hasattr(self, 'tokenizer'):
+                        processed_stop_words.append(self.tokenizer.encode(stop_seq, add_special_tokens=False))
+                    else:
+                        raise ValueError("tokenizer does not exist in LLM instance")
+                else:
+                    processed_stop_words.append(stop_seq)
+        print(f"stop word tokens: {processed_stop_words}")
+
         print("Start prefilling ...")
         torch.cuda.synchronize()
         prefill_start = time.time()
@@ -181,10 +195,39 @@ class LLM:
         print("Start decoding ...")
         decode_start = time.time()
 
+        batch_size = output_ids.shape[0]
+
+        finished = [False] * batch_size
+
+        # 记录每个序列遇到stop word时应截断的位置
+        stop_pos = [None] * batch_size
         for _ in range(self.max_new_length-1):
             logits = self.decode_forward(inputs_ids=output_ids)
-            output_ids = logits.argmax(dim=-1)
-            outputs_ids.append(output_ids)
+            next_token = logits.argmax(dim=-1)
+
+            # 对于已完成的序列，保持其token不变
+            for i in range(batch_size):
+                if finished[i]:
+                    next_token[i] = output_ids[i]
+            outputs_ids.append(next_token)
+            output_ids = next_token
+
+            # 检查每个序列是否遇到停止词
+            if processed_stop_words is not None:
+                generated = torch.cat(outputs_ids, dim=-1)
+                for batch_idx in range(batch_size):
+                    if finished[batch_idx]:
+                        continue
+                    for stop_seq in processed_stop_words:
+                        if len(stop_seq) == 0:
+                            continue
+                        if generated.shape[1] >= len(stop_seq):
+                            if generated[batch_idx, -len(stop_seq):].tolist() == stop_seq:
+                                finished[batch_idx] = True
+                                stop_pos[batch_idx] = generated.shape[1] - len(stop_seq)
+            # 如果所有序列都完成则break
+            if all(finished):
+                break
 
         decode_end = time.time()
         print(colored(
@@ -193,9 +236,20 @@ class LLM:
             f"Decoding total time: {round((decode_end - decode_start), 4)} s\n",
             'green'
         ))
-        
-        outputs_ids = torch.cat(outputs_ids, dim=-1).tolist()
-        
+
+        outputs_ids = torch.cat(outputs_ids, dim=-1)
+        # 截断stop word
+        if processed_stop_words is not None and any(pos is not None for pos in stop_pos):
+            results = []
+            for i, row in enumerate(outputs_ids.tolist()):
+                if stop_pos[i] is not None:
+                    results.append(row[:stop_pos[i]])
+                else:
+                    results.append(row)
+            outputs_ids = results
+        else:
+            outputs_ids = outputs_ids.tolist()
+
         return outputs_ids
 
 
@@ -224,6 +278,7 @@ class LLM:
         print("Allocate GPU buffers and CPU pin memory ...\n")
         self.init_kv_cache(input_length, valid_start, attn_config)
 
-        outputs = self.inference(inputs_ids)
+        outputs = self.inference(inputs_ids, stop_words=["</s>", "assistant:", "Question:", "user:", "USER:"])
+        # stop word tokens: [[524, 82, 29], [78191, 25], [14924, 25], [882, 25], [6584, 25]]
 
         return outputs

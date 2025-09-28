@@ -116,7 +116,7 @@ def rouge_zh_score(prediction, ground_truth, **kwargs):
     return score
 
 def f1_score(prediction, ground_truth, **kwargs):
-    common = Counter(prediction) & Counter(ground_truth)
+    common = Counter(prediction) & Counter(ground_truth)    # common = {'jamie': 1, 'oliver': 1}
     num_same = sum(common.values())
     if num_same == 0:
         return 0
@@ -131,7 +131,18 @@ def qa_f1_score(prediction, ground_truth, **kwargs):
 
     prediction_tokens = normalized_prediction.split()
     ground_truth_tokens = normalized_ground_truth.split()
-    return f1_score(prediction_tokens, ground_truth_tokens)
+
+    # print(prediction_tokens)
+    # print(ground_truth_tokens)
+
+    ret = f1_score(prediction_tokens, ground_truth_tokens)
+    # print(ret)
+
+    # ['jamie', 'oliver']
+    # ['james', 'trevor', 'jamie', 'oliver', 'mbe'] "James Trevor 'Jamie' Oliver, MBE"
+    # 0.5714285714285715
+
+    return ret
 
 
 def qa_f1_zh_score(prediction, ground_truth, **kwargs):

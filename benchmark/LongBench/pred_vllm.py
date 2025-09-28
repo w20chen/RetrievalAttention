@@ -1,6 +1,8 @@
 import os
 
-os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# -os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+os.environ['HF_ENDPOINT'] = 'https://huggingface.co'
 
 import sys
 import json
@@ -32,7 +34,7 @@ def get_pred_vllm(llm, data, max_new_tokens, prompt_format, out_path):
         temperature=0.8, 
         top_p=0.95, 
         max_tokens=max_new_tokens, 
-        stop=[]
+        stop=["Human:", "Assistant:", "assistant", "User:", "System:", "</s>", "Question:", "Q:", "\n\n", "\\n\\n"]
     )
 
     tokenizer = llm.get_tokenizer() if hasattr(llm, 'get_tokenizer') else None
@@ -77,8 +79,13 @@ def main():
         ]
     else:
         if not args.task:
-            raise ValueError("--task must be specified when not using --e")
-        datasets = [args.task]
+            # raise ValueError("--task must be specified when not using --e")
+            datasets = [
+                "qasper", "gov_report",
+                "triviaqa", "lcc", "repobench-p"
+            ]
+        else:
+            datasets = [args.task]
 
     for dataset in datasets:
         if args.e:
